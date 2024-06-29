@@ -1,0 +1,126 @@
+ /*
+ * BUG#0
+ * description: lack of ";"
+ * miss semicolon: 
+ * location:
+ * enum { buf_size = buf_nrec * 100 }  (line 52)
+ * evidence: lack of ";"
+ * test.c:19: error: gen_sort.c:54:9: 错误：expected ‘;’, identifier or ‘(’ before ‘struct’
+   54 | typedef struct record {
+      |         ^~~~~~
+  */
+
+  
+ * BUG#1
+ * description: lack of ";"
+ * miss semicolon: 
+ * location:
+ * } record_t; (line 58)
+ * evidence: lack of ";"
+ * test.c:19: error: gen_sort.c:58:9: 错误：expected ‘;’, identifier or ‘(’ before ‘struct’
+   gen_sort.c:58:11: 错误：expected ‘;’ before ‘static’
+   58 | } record_t
+  
+
+   
+ * BUG#2
+ * description: undefined identifier "record"
+ * location:
+ * gen_rec(record *rec) (line 114)
+ * evidence: 
+ * test.c:19: gen_sort.c:114:9: 错误：未知的类型名‘record’
+  114 | gen_rec(record *rec)
+      |         ^~~~~~
+ * fix method: add _t after record
+  
+
+    
+ * BUG#3
+ * description: undefined identifier FILE 
+ * location:
+ * FILE *file = fopen(fn, "r"); (line 187)
+ * evidence: 
+ * gen_sort.c:187:2: 错误：未知的类型名‘FILE’
+  187 |  FILE *file = fopen(fn, "r");
+      |  ^~~~
+gen_sort.c:187:2: 附注：‘FILE’ is defined in header ‘<stdio.h>’; did you forget to ‘#include <stdio.h>’?
+ * fix method: add "#include<stdio.h>
+  
+
+
+   
+ * BUG#4
+ * description: lack ( in line 188 if (!file)
+ * location:
+ * while (cur_rec < rec_max) {(line 194)
+ * evidence: 
+ *  gen_sort.c:194:2: 错误：expected identifier or ‘(’ before ‘while’
+  194 |  while (cur_rec < rec_max) {
+      |  ^~~~~
+  
+
+    
+ * BUG#5
+ * description: rec_len is added by key_len + pad_len+recno_len
+ * location:
+ * rec_len = key_len + pad_len+recno_len (line 60)
+ * evidence: 
+ *  if (ret != cnt * rec_len) (line 219)
+  
+
+     
+ * BUG#6
+ * description: during a for cycle, it should add j instead of i
+ * location:
+ * for (j = 0; j < 10; j++) (line 146)
+ * evidence: 
+ *  for (j = 0; j < 10; i++)
+   fix method: change i into j
+     
+ * BUG#6
+ * description: use < instead of <=
+ * location:
+ *  for (cnt = 0; (cnt < buf_nrec) && ((cur_rec + cnt) < rec_max); cnt++) (line 168)
+ * evidence: 
+ *  for (cnt = 0; (cnt <= buf_nrec) && ((cur_rec + cnt) < rec_max); cnt++)
+   fix method: change <= into <
+  
+
+
+ * BUG#7
+ * description: buf segfault
+ * location:
+ *  char *buf = (char *)malloc(buf_size); (line 201)
+ * evidence: 
+ *  char *buf = (char *)malloc(buf_nrec);
+   fix method: change buf_nrec into buf_size
+ 
+
+
+ * BUG#8
+ * description: wrong open method of file
+ * location:
+ *  FILE *file = fopen(fn, "w"); (line 208)
+ * evidence: 
+ *  FILE *file = fopen(fn, "r");
+   fix method: change r into w
+ 
+ * BUG#9
+ * description: lack of ")"
+ * location:
+ * record_t *rec = (record_t *)buf; (line145)
+ * evidence: 
+ *  gen_sort.c:145:29: 错误：expected expression before ‘)’ token
+  145 |  record_t *rec = (record_t *)buf;
+      |                             ^
+   fix method: change r into w
+ 
+ * BUG#10
+ * description: lack of ";"
+ * miss semicolon: 
+ * location:
+ * enum { buf_size = buf_nrec * 100 }  (line 52)
+ * evidence: lack of ";"
+ * test.c:19: error: gen_sort.c:54:9: 错误：expected ‘;’, identifier or ‘(’ before ‘struct’
+   54 | typedef struct record {
+      |         ^~~~~~

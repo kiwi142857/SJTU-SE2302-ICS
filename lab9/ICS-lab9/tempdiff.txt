@@ -1,0 +1,163 @@
+77c77
+< static int get_free_list_index(size_t size);
+---
+> static void **get_free_listpp(size_t size);
+79d78
+< static int verbose = 1;
+86a86
+> 
+164,168d163
+<     
+<     if(verbose) {
+<         printf("Initializing heap...\n");
+<     }
+< 
+170c165
+<     heap_listp = mem_sbrk(ALIGN(LISTLENGTH * WSIZE) + 4 * WSIZE);
+---
+>     heap_listp = mem_sbrk(ALIGN(LISTLENGTH * sizeof(void *)) + 4 * WSIZE);
+177c172
+<         PUT(free_listps + i * WSIZE, 0);
+---
+>         free_listps[i] = NULL;
+181c176
+<     heap_listp += ALIGN(LISTLENGTH * WSIZE) + 2 * WSIZE;
+---
+>     heap_listp += ALIGN(LISTLENGTH * sizeof(void *)) + 2 * WSIZE;
+199,201d193
+<     if(verbose) {
+<         printf("Allocating %d bytes...\n", size);
+<     }
+228,230d219
+<     if(verbose) {
+<         printf("Freeing block %p...\n", ptr);
+<     }
+248,250d236
+<     if(verbose) {
+<         printf("Reallocating block %p to %d bytes...\n", ptr, size);
+<     }
+328,330d313
+<     if(verbose) {
+<         printf("Extending heap by %d bytes...\n", size);
+<     }
+351,353d333
+<     if(verbose) {
+<         printf("Coalescing block %p...\n", bp);
+<     }
+399,402c379
+< {   
+<     if(verbose) {
+<         printf("Finding fit for %d bytes...\n", asize);
+<     }
+---
+> {
+407c384
+<     int idx = get_free_list_index(asize);
+---
+>     int idx = get_free_listpp(asize) - free_listps;
+411c388
+<         void *bp = free_listps + i * WSIZE;
+---
+>         void *bp = free_listps[i];
+428,430d404
+<     if(verbose) {
+<         printf("Placing %d bytes in block %p...\n", asize, bp);
+<     }
+472,474d445
+<     if(verbose) {
+<         printf("Inserting block %p to free list...\n", bp);
+<     }
+478,479c449,450
+<     int index = get_free_list_index(size);
+<     void *free_listpp = free_listps + index * WSIZE;
+---
+>     void **free_listpp = get_free_listpp(size);
+> 
+481,483c452,455
+<     if(GET(free_listpp) == 0) {
+<         PUT(free_listpp, GET_OFFSET(bp));
+<         return bp;
+---
+>     if (*free_listpp) {
+>         PUT(PRED(*free_listpp), GET_OFFSET(bp));
+>         PUT(SUCC(bp), GET_OFFSET(*free_listpp));
+>         PUT(PRED(bp), 0);
+485c457
+<         void *next = GET_ADDR(GET(free_listpp));
+---
+>         PUT(SUCC(bp), 0);
+487,489d458
+<         PUT(SUCC(bp), GET(free_listpp));
+<         PUT(PRED(next), GET_OFFSET(bp));
+<         PUT(free_listpp, GET_OFFSET(bp));
+491a461,463
+>     /* set the list pointer */
+>     *free_listpp = bp;
+> 
+500,502d471
+<     if(verbose) {
+<         printf("Removing block %p from free list...\n", bp);
+<     }
+504,511c473,485
+<     int index = get_free_list_index(size);
+<     void *free_listpp = free_listps + index * WSIZE;
+< 
+<     void *pred = PREV_FREEP(bp);
+<     void *succ = NEXT_FREEP(bp);
+< 
+<     if (pred) {
+<         PUT(SUCC(pred), GET(SUCC(bp)));
+---
+>     void **free_listpp = get_free_listpp(size);
+>     void *prev = PREV_FREEP(bp);
+>     void *next = NEXT_FREEP(bp);
+> 
+>     /* 4 cases accroding to the existence of previous and next block */
+>     if (prev && next) {
+>         PUT(SUCC(prev), GET(SUCC(bp)));
+>         PUT(PRED(next), GET(PRED(bp)));
+>     } else if (prev && !next) {
+>         PUT(SUCC(prev), 0);
+>     } else if (!prev && next) {
+>         PUT(PRED(next), 0);
+>         *free_listpp = next;
+513,517c487
+<         PUT(free_listpp, GET(SUCC(bp)));
+<     }
+< 
+<     if (succ) {
+<         PUT(PRED(succ), GET(PRED(bp)));
+---
+>         *free_listpp = NULL;
+528,530d497
+<     if(verbose) {
+<         printf("Getting free list for %d bytes...\n", size);
+<     }
+548,574d514
+< }
+< 
+< /*
+< * get_free_list_index - get free list index by size
+< */
+< static int get_free_list_index(size_t size)
+< {
+<     if(verbose) {
+<         printf("Getting free list index for %d bytes...\n", size);
+<     }
+<     /* linear part */
+<     size_t linear_index = size / DSIZE - 2;
+<     if (linear_index < LINEARMAX) {
+<         return linear_index;
+<     }
+< 
+<     /* power of 2 part */
+<     size_t search = (size - 1) >> LINEARLENGTH;
+<     for (int i = LINEARMAX; i < LISTLENGTH - 1; ++i) {
+<         if (!search)
+<             return i;
+< 
+<         search >>= 1;
+<     }
+< 
+<     /* largest ones */
+<     return LISTLENGTH - 1;

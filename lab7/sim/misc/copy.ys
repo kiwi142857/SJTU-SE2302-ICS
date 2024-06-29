@@ -1,0 +1,49 @@
+# 陈启炜+522031910299
+    .pos 0
+init: irmovq Stack, %rsp
+    call Main
+    halt
+
+Main: 
+    irmovq src, %rdi
+    irmovq dest, %rsi
+    irmovq $3, %rcx
+    call Copy
+    xorq %rsi, %rsi
+    xorq %rdi, %rdi
+    ret 
+
+Copy: 
+    xorq %rax, %rax
+    irmovq $8, %r9
+    irmovq $-1, %r10
+Loop:
+    andq %rcx, %rcx
+    jle End
+    mrmovq (%rdi), %r8
+    addq %r9, %rdi
+    rmmovq %r8, (%rsi)
+    addq %r9, %rsi
+    xorq %r8, %rax
+    addq %r10, %rcx
+    jmp Loop
+End:  
+    xorq %r8, %r8
+    xorq %r9, %r9
+    xorq %r10, %r10
+	ret
+
+.align 8
+# Source block
+src:
+    .quad 0x00a
+    .quad 0x0b0
+    .quad 0xc00
+# Destination block
+dest:
+    .quad 0x111
+    .quad 0x222
+    .quad 0x333
+
+.pos 0x200		
+Stack:

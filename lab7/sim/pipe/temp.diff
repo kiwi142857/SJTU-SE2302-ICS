@@ -1,0 +1,59 @@
+1d0
+< 
+53a53,55
+> wordsig ALUSUB	'A_SUB'		     # ALU should subtract its arguments
+> wordsig ALUAND	'A_AND'		     # ALU should AND its arguments
+> wordsig ALUXOR	'A_XOR'		     # ALU should XOR its arguments
+80a83
+> wordsig D_ifun 'if_id_curr->ifun'     # Function code
+180c183
+< 	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIADDQ };
+---
+> 	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL,IIADDQ };
+185c188,189
+< 	f_icode in { IJXX, ICALL } : f_valC;
+---
+> 	f_icode in { ICALL, IJXX } : f_valC;
+> 	
+201c205
+< 	D_icode in { IOPQ, IRMMOVQ, IMRMOVQ, IIADDQ } : D_rB;
+---
+> 	D_icode in { IOPQ, IRMMOVQ, IMRMOVQ, IIADDQ  } : D_rB;
+233c237
+< 	D_icode == IJXX : 0;
+---
+>  	D_icode == IJXX : 0;
+245a250
+> 	E_icode == IJXX : 0;
+250d254
+< 	E_icode == IJXX : 0;
+257c261
+< 		     IPUSHQ, IRET, IPOPQ, IIADDQ, IJXX } : E_valB;
+---
+> 		     IPUSHQ, IRET, IPOPQ, IIADDQ } : E_valB;
+264a269
+> 	E_icode == IIADDQ : E_ifun;
+269c274
+< bool set_cc = E_icode in { IOPQ, IIADDQ } &&
+---
+> bool set_cc = ( E_icode == IOPQ || E_icode == IIADDQ ) &&
+274,277c279
+< word e_valA = [
+< 	E_icode == IJXX && E_valB == 1 : E_valC;
+< 	1 : E_valA;    # Pass valA through stage
+< ];
+---
+> word e_valA = E_valA;    # Pass valA through stage
+347c349
+< 	(E_icode == IJXX && !e_Cnd && E_valB == 0) || (E_icode == IJXX && e_Cnd && E_valB == 1) ||
+---
+> 	(E_icode == IJXX && !e_Cnd) ||
+358c360
+< 	(E_icode == IJXX && !e_Cnd && E_valB == 0) || (E_icode == IJXX && e_Cnd && E_valB == 1) ||
+---
+> 	(E_icode == IJXX && !e_Cnd) ||
+372c374
+< #/* $end pipe-all-hcl */
+\ 文件尾没有换行符
+---
+> #/* $end pipe-all-hcl */
